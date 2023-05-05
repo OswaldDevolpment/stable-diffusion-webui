@@ -71,15 +71,18 @@ gradio_hf_hub_themes = [
 ]
 
 
-cmd_opts.disable_extension_access = (cmd_opts.share or cmd_opts.listen or cmd_opts.server_name) and not cmd_opts.enable_insecure_extension_access
+cmd_opts.disable_extension_access = (
+    cmd_opts.share or cmd_opts.listen or cmd_opts.server_name) and not cmd_opts.enable_insecure_extension_access
 
 devices.device, devices.device_interrogate, devices.device_gfpgan, devices.device_esrgan, devices.device_codeformer = \
-    (devices.cpu if any(y in cmd_opts.use_cpu for y in [x, 'all']) else devices.get_optimal_device() for x in ['sd', 'interrogate', 'gfpgan', 'esrgan', 'codeformer'])
+    (devices.cpu if any(y in cmd_opts.use_cpu for y in [x, 'all']) else devices.get_optimal_device(
+    ) for x in ['sd', 'interrogate', 'gfpgan', 'esrgan', 'codeformer'])
 
 device = devices.device
 weight_load_location = None if cmd_opts.lowram else "cpu"
 
-batch_cond_uncond = cmd_opts.always_batch_cond_uncond or not (cmd_opts.lowvram or cmd_opts.medvram)
+batch_cond_uncond = cmd_opts.always_batch_cond_uncond or not (
+    cmd_opts.lowvram or cmd_opts.medvram)
 parallel_processing_allowed = not cmd_opts.lowvram and not cmd_opts.medvram
 xformers_available = False
 config_filename = cmd_opts.ui_settings_file
@@ -178,9 +181,11 @@ class State:
 
         import modules.sd_samplers
         if opts.show_progress_grid:
-            self.assign_current_image(modules.sd_samplers.samples_to_image_grid(self.current_latent))
+            self.assign_current_image(
+                modules.sd_samplers.samples_to_image_grid(self.current_latent))
         else:
-            self.assign_current_image(modules.sd_samplers.sample_to_image(self.current_latent))
+            self.assign_current_image(
+                modules.sd_samplers.sample_to_image(self.current_latent))
 
         self.current_image_sampling_step = self.sampling_step
 
@@ -198,6 +203,7 @@ prompt_styles = modules.styles.StyleDatabase(styles_filename)
 interrogator = modules.interrogate.InterrogateModels("interrogate")
 
 face_restorers = []
+
 
 class OptionInfo:
     def __init__(self, default=None, label="", component=None, component_args=None, onchange=None, section=None, refresh=None):
@@ -411,7 +417,7 @@ options_templates.update(options_section(('sd', "Stable Diffusion"), {
     "enable_quantization": OptionInfo(False, "Enable quantization in K samplers for sharper and cleaner results. This may change existing seeds. Requires restart to apply."),
     "enable_emphasis": OptionInfo(True, "Emphasis: use (text) to make model pay more attention to text and [text] to make it pay less attention"),
     "enable_batch_seeds": OptionInfo(True, "Make K-diffusion samplers produce same images in a batch as when making a single image"),
-    "comma_padding_backtrack": OptionInfo(20, "Increase coherency by padding from the last comma within n tokens when using more than 75 tokens", gr.Slider, {"minimum": 0, "maximum": 74, "step": 1 }),
+    "comma_padding_backtrack": OptionInfo(20, "Increase coherency by padding from the last comma within n tokens when using more than 75 tokens", gr.Slider, {"minimum": 0, "maximum": 74, "step": 1}),
     "CLIP_stop_at_last_layers": OptionInfo(1, "Clip skip", gr.Slider, {"minimum": 1, "maximum": 12, "step": 1}),
     "upcast_attn": OptionInfo(False, "Upcast cross attention layer to float32"),
     "randn_source": OptionInfo("GPU", "Random number generator source. Changes seeds drastically. Use CPU to produce the same picture across different vidocard vendors.", gr.Radio, {"choices": ["GPU", "CPU"]}),
@@ -645,10 +651,12 @@ class Options:
         info = opts.data_labels.get(key, None)
         comp_args = info.component_args if info else None
         if isinstance(comp_args, dict) and comp_args.get('visible', True) is False:
-            raise RuntimeError(f"not possible to set {key} because it is restricted")
+            raise RuntimeError(
+                f"not possible to set {key} because it is restricted")
 
         if cmd_opts.hide_ui_dir_config and key in restricted_opts:
-            raise RuntimeError(f"not possible to set {key} because it is restricted")
+            raise RuntimeError(
+                f"not possible to set {key} because it is restricted")
 
         self.data[key] = value
         return
@@ -713,11 +721,13 @@ class Options:
         for k, v in self.data.items():
             info = self.data_labels.get(k, None)
             if info is not None and not self.same_type(info.default, v):
-                print(f"Warning: bad setting value: {k}: {v} ({type(v).__name__}; expected {type(info.default).__name__})", file=sys.stderr)
+                print(
+                    f"Warning: bad setting value: {k}: {v} ({type(v).__name__}; expected {type(info.default).__name__})", file=sys.stderr)
                 bad_settings += 1
 
         if bad_settings > 0:
-            print(f"The program is likely to not work with bad settings.\nSettings file: {filename}\nEither fix the file, or delete it and restart.", file=sys.stderr)
+            print(
+                f"The program is likely to not work with bad settings.\nSettings file: {filename}\nEither fix the file, or delete it and restart.", file=sys.stderr)
 
     def onchange(self, key, func, call=True):
         item = self.data_labels.get(key)
@@ -727,7 +737,8 @@ class Options:
             func()
 
     def dumpjson(self):
-        d = {k: self.data.get(k, self.data_labels.get(k).default) for k in self.data_labels.keys()}
+        d = {k: self.data.get(k, self.data_labels.get(k).default)
+             for k in self.data_labels.keys()}
         return json.dumps(d)
 
     def add_option(self, key, info):
@@ -767,7 +778,6 @@ class Options:
             value = expected_type(value)
 
         return value
-
 
 
 opts = Options()
@@ -813,7 +823,6 @@ def reload_gradio_theme(theme_name=None):
             gradio_theme = gr.themes.Default()
 
 
-
 class TotalTQDM:
     def __init__(self):
         self._tqdm = None
@@ -854,7 +863,8 @@ mem_mon.start()
 
 
 def listfiles(dirname):
-    filenames = [os.path.join(dirname, x) for x in sorted(os.listdir(dirname), key=str.lower) if not x.startswith(".")]
+    filenames = [os.path.join(dirname, x) for x in sorted(
+        os.listdir(dirname), key=str.lower) if not x.startswith(".")]
     return [file for file in filenames if os.path.isfile(file)]
 
 
