@@ -10,13 +10,15 @@ import tempfile
 import time
 import traceback
 import warnings
-from functools import partial, reduce
+from functools import partial
+from functools import reduce
 
 import gradio as gr
 import gradio.routes
 import gradio.utils
 import numpy as np
-from PIL import Image, PngImagePlugin
+from PIL import Image
+from PIL import PngImagePlugin
 
 import modules.codeformer_model
 import modules.extras
@@ -27,21 +29,39 @@ import modules.scripts
 import modules.shared as shared
 import modules.styles
 import modules.textual_inversion.ui
-from modules import (deepbooru, extra_networks, localization, postprocessing,
-                     progress, prompt_parser, script_callbacks, sd_hijack,
-                     sd_models, sd_vae, ui_common, ui_components,
-                     ui_extensions, ui_postprocessing)
-from modules.call_queue import (wrap_gradio_call, wrap_gradio_gpu_call,
-                                wrap_queued_call)
+from modules import deepbooru
+from modules import extra_networks
+from modules import localization
+from modules import postprocessing
+from modules import progress
+from modules import prompt_parser
+from modules import script_callbacks
+from modules import sd_hijack
+from modules import sd_models
+from modules import sd_vae
+from modules import ui_common
+from modules import ui_components
+from modules import ui_extensions
+from modules import ui_postprocessing
+from modules.call_queue import wrap_gradio_call
+from modules.call_queue import wrap_gradio_gpu_call
+from modules.call_queue import wrap_queued_call
 from modules.generation_parameters_copypaste import image_from_url_text
 from modules.images import save_image
-from modules.paths import data_path, script_path
+from modules.paths import data_path
+from modules.paths import script_path
 from modules.sd_hijack import model_hijack
-from modules.sd_samplers import samplers, samplers_for_img2img
-from modules.shared import cmd_opts, opts, restricted_opts
+from modules.sd_samplers import samplers
+from modules.sd_samplers import samplers_for_img2img
+from modules.shared import cmd_opts
+from modules.shared import opts
+from modules.shared import restricted_opts
 from modules.textual_inversion import textual_inversion
-from modules.ui_components import (FormColumn, FormGroup, FormHTML, FormRow,
-                                   ToolButton)
+from modules.ui_components import FormColumn
+from modules.ui_components import FormGroup
+from modules.ui_components import FormHTML
+from modules.ui_components import FormRow
+from modules.ui_components import ToolButton
 
 warnings.filterwarnings(
     "default" if opts.show_warnings else "ignore", category=UserWarning
