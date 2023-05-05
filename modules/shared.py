@@ -4,35 +4,22 @@ import json
 import os
 import sys
 import time
-import requests
 
-from PIL import Image
 import gradio as gr
+import requests
 import tqdm
+from PIL import Image
 
+import modules.devices as devices
 import modules.interrogate
 import modules.memmon
 import modules.styles
-import modules.devices as devices
-from modules import (
-    localization,
-    script_loading,
-    errors,
-    ui_components,
-    shared_items,
-    cmd_args,
-)
-from modules.paths_internal import (
-    models_path,
-    script_path,
-    data_path,
-    sd_configs_path,
-    sd_default_config,
-    sd_model_file,
-    default_sd_model_file,
-    extensions_dir,
-    extensions_builtin_dir,
-)
+from modules import (cmd_args, errors, localization, script_loading,
+                     shared_items, ui_components)
+from modules.paths_internal import (data_path, default_sd_model_file,
+                                    extensions_builtin_dir, extensions_dir,
+                                    models_path, script_path, sd_configs_path,
+                                    sd_default_config, sd_model_file)
 
 demo = None
 
