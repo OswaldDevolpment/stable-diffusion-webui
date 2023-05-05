@@ -237,7 +237,7 @@ tab_names = []
 
 options_templates = {}
 
-options_templates |= options_section(
+options_templates = options_section(
     ('saving-images', "Saving images/grids"),
     {
         "samples_save": OptionInfo(True, "Always save all generated images"),
@@ -866,7 +866,5 @@ def html(filename):
     path = html_path(filename)
 
     if os.path.exists(path):
-        with open(path, encoding="utf8") as file:
-            return file.read()
-
-    return ""
+        with open(path, encoding="utf8") as file:           
+    pass
