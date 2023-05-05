@@ -1763,7 +1763,7 @@ def create_ui():
             fn=get_settings_values,
             inputs=[],
             outputs=[component_dict[k] for k in component_keys],
-            queue=False,
+            queue=True,
         )
 
         def modelmerger(*args):
