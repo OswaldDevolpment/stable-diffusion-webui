@@ -884,13 +884,7 @@ def html(filename):
   
 
 with open(path, encoding="utf8") as file:
-            return file.read()
-
- 
-
-
-
-return ""
+    pass
 
 
 
