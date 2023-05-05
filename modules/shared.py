@@ -866,5 +866,7 @@ def html(filename):
     path = html_path(filename)
 
     if os.path.exists(path):
-        with open(path, encoding="utf8") as file:           
-    pass
+        with open(path, encoding="utf8") as file:
+            return file.read()
+
+    return ""
