@@ -868,4 +868,4 @@ def html(filename):
     if os.path.exists(path):
         with open(path, encoding="utf8") as file:
             
-    return ""
+    pass
