@@ -9,37 +9,17 @@ import sys
 import tempfile
 import time
 import traceback
-from functools import partial, reduce
 import warnings
+from functools import partial, reduce
 
 import gradio as gr
 import gradio.routes
 import gradio.utils
 import numpy as np
 from PIL import Image, PngImagePlugin
-from modules.call_queue import wrap_gradio_gpu_call, wrap_queued_call, wrap_gradio_call
-
-from modules import (
-    sd_hijack,
-    sd_models,
-    localization,
-    script_callbacks,
-    ui_extensions,
-    deepbooru,
-    sd_vae,
-    extra_networks,
-    postprocessing,
-    ui_components,
-    ui_common,
-    ui_postprocessing,
-    progress,
-)
-from modules.ui_components import FormRow, FormColumn, FormGroup, ToolButton, FormHTML
-from modules.paths import script_path, data_path
-
-from modules.shared import opts, cmd_opts, restricted_opts
 
 import modules.codeformer_model
+import modules.extras
 import modules.generation_parameters_copypaste as parameters_copypaste
 import modules.gfpgan_model
 import modules.hypernetworks.ui
@@ -47,14 +27,21 @@ import modules.scripts
 import modules.shared as shared
 import modules.styles
 import modules.textual_inversion.ui
-from modules import prompt_parser
+from modules import (deepbooru, extra_networks, localization, postprocessing,
+                     progress, prompt_parser, script_callbacks, sd_hijack,
+                     sd_models, sd_vae, ui_common, ui_components,
+                     ui_extensions, ui_postprocessing)
+from modules.call_queue import (wrap_gradio_call, wrap_gradio_gpu_call,
+                                wrap_queued_call)
+from modules.generation_parameters_copypaste import image_from_url_text
 from modules.images import save_image
+from modules.paths import data_path, script_path
 from modules.sd_hijack import model_hijack
 from modules.sd_samplers import samplers, samplers_for_img2img
+from modules.shared import cmd_opts, opts, restricted_opts
 from modules.textual_inversion import textual_inversion
-import modules.hypernetworks.ui
-from modules.generation_parameters_copypaste import image_from_url_text
-import modules.extras
+from modules.ui_components import (FormColumn, FormGroup, FormHTML, FormRow,
+                                   ToolButton)
 
 warnings.filterwarnings(
     "default" if opts.show_warnings else "ignore", category=UserWarning
@@ -137,7 +124,7 @@ def add_style(name: str, prompt: str, negative_prompt: str):
 
 
 def calc_resolution_hires(enable, width, height, hr_scale, hr_resize_x, hr_resize_y):
-    from modules import processing, devices
+    from modules import devices, processing
 
     if not enable:
         return ""
@@ -3244,6 +3231,7 @@ if not hasattr(shared, "GradioTemplateResponseOriginal"):
 
 def versions_html():
     import torch
+
     import launch
 
     python_version = ".".join([str(x) for x in sys.version_info[0:3]])
