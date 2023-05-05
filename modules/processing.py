@@ -6,16 +6,23 @@ import os
 import random
 import sys
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import cv2
 import numpy as np
 import torch
-from blendmodes.blend import BlendType, blendLayers
-from einops import rearrange, repeat
+from blendmodes.blend import blendLayers
+from blendmodes.blend import BlendType
+from einops import rearrange
+from einops import repeat
 from ldm.data.util import AddMiDaS
 from ldm.models.diffusion.ddpm import LatentDepth2ImageDiffusion
-from PIL import Image, ImageFilter, ImageOps
+from PIL import Image
+from PIL import ImageFilter
+from PIL import ImageOps
 from skimage import exposure
 
 import modules.face_restoration
@@ -26,11 +33,20 @@ import modules.sd_models as sd_models
 import modules.sd_vae as sd_vae
 import modules.shared as shared
 import modules.styles
-from modules import (devices, extra_networks, generation_parameters_copypaste,
-                     lowvram, masking, prompt_parser, script_callbacks,
-                     scripts, sd_samplers, sd_vae_approx)
+from modules import devices
+from modules import extra_networks
+from modules import generation_parameters_copypaste
+from modules import lowvram
+from modules import masking
+from modules import prompt_parser
+from modules import script_callbacks
+from modules import scripts
+from modules import sd_samplers
+from modules import sd_vae_approx
 from modules.sd_hijack import model_hijack
-from modules.shared import cmd_opts, opts, state
+from modules.shared import cmd_opts
+from modules.shared import opts
+from modules.shared import state
 
 # some of those options should not be changed at all because they would break the model, so I removed them from options.
 opt_C = 4
