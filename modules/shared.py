@@ -1,10 +1,5 @@
 import argparse
 import datetime
-
-
-
-
-
 import json
 import os
 import sys
@@ -237,22 +232,12 @@ def list_samplers():
     return modules.sd_samplers.all_samplers
 
 
-
-
 hide_dirs = {"visible": not cmd_opts.hide_ui_dir_config}
-
-
 tab_names = []
 
 options_templates = {}
 
-
-
-options_templates |= options_section(
-
-    
-    
-    
+options_templates = options_section(    
     ('saving-images', "Saving images/grids"),
     {
         "samples_save": OptionInfo(True, "Always save all generated images"),
