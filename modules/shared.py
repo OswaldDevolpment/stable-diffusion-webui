@@ -14,12 +14,21 @@ import modules.devices as devices
 import modules.interrogate
 import modules.memmon
 import modules.styles
-from modules import (cmd_args, errors, localization, script_loading,
-                     shared_items, ui_components)
-from modules.paths_internal import (data_path, default_sd_model_file,
-                                    extensions_builtin_dir, extensions_dir,
-                                    models_path, script_path, sd_configs_path,
-                                    sd_default_config, sd_model_file)
+from modules import cmd_args
+from modules import errors
+from modules import localization
+from modules import script_loading
+from modules import shared_items
+from modules import ui_components
+from modules.paths_internal import data_path
+from modules.paths_internal import default_sd_model_file
+from modules.paths_internal import extensions_builtin_dir
+from modules.paths_internal import extensions_dir
+from modules.paths_internal import models_path
+from modules.paths_internal import script_path
+from modules.paths_internal import sd_configs_path
+from modules.paths_internal import sd_default_config
+from modules.paths_internal import sd_model_file
 
 demo = None
 
