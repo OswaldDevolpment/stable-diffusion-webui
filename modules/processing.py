@@ -482,7 +482,7 @@ def create_infotext(p, all_prompts, all_seeds, all_subseeds, comments=None, iter
         "NGMS": None if p.s_min_uncond == 0 else p.s_min_uncond,
     }
 
-    generation_params |= p.extra_generation_params
+    generation_params = p.extra_generation_params
 
     generation_params_text = ", ".join([k if k == v else f'{k}: {generation_parameters_copypaste.quote(v)}' for k, v in generation_params.items() if v is not None])
 
