@@ -131,7 +131,7 @@ class State:
         self.current_image_sampling_step = 0
 
     def dict(self):
-        obj = {
+        return {
             "skipped": self.skipped,
             "interrupted": self.interrupted,
             "job": self.job,
@@ -141,8 +141,6 @@ class State:
             "sampling_step": self.sampling_step,
             "sampling_steps": self.sampling_steps,
         }
-
-        return obj
 
     def begin(self):
         self.sampling_step = 0
@@ -240,42 +238,107 @@ tab_names = []
 
 options_templates = {}
 
-options_templates.update(options_section(('saving-images', "Saving images/grids"), {
-    "samples_save": OptionInfo(True, "Always save all generated images"),
-    "samples_format": OptionInfo('png', 'File format for images'),
-    "samples_filename_pattern": OptionInfo("", "Images filename pattern", component_args=hide_dirs),
-    "save_images_add_number": OptionInfo(True, "Add number to filename when saving", component_args=hide_dirs),
-
-    "grid_save": OptionInfo(True, "Always save all generated image grids"),
-    "grid_format": OptionInfo('png', 'File format for grids'),
-    "grid_extended_filename": OptionInfo(False, "Add extended info (seed, prompt) to filename when saving grid"),
-    "grid_only_if_multiple": OptionInfo(True, "Do not save grids consisting of one picture"),
-    "grid_prevent_empty_spots": OptionInfo(False, "Prevent empty spots in grid (when set to autodetect)"),
-    "n_rows": OptionInfo(-1, "Grid row count; use -1 for autodetect and 0 for it to be same as batch size", gr.Slider, {"minimum": -1, "maximum": 16, "step": 1}),
-
-    "enable_pnginfo": OptionInfo(True, "Save text information about generation parameters as chunks to png files"),
-    "save_txt": OptionInfo(False, "Create a text file next to every image with generation parameters."),
-    "save_images_before_face_restoration": OptionInfo(False, "Save a copy of image before doing face restoration."),
-    "save_images_before_highres_fix": OptionInfo(False, "Save a copy of image before applying highres fix."),
-    "save_images_before_color_correction": OptionInfo(False, "Save a copy of image before applying color correction to img2img results"),
-    "save_mask": OptionInfo(False, "For inpainting, save a copy of the greyscale mask"),
-    "save_mask_composite": OptionInfo(False, "For inpainting, save a masked composite"),
-    "jpeg_quality": OptionInfo(80, "Quality for saved jpeg images", gr.Slider, {"minimum": 1, "maximum": 100, "step": 1}),
-    "webp_lossless": OptionInfo(False, "Use lossless compression for webp images"),
-    "export_for_4chan": OptionInfo(True, "If the saved image file size is above the limit, or its either width or height are above the limit, save a downscaled copy as JPG"),
-    "img_downscale_threshold": OptionInfo(4.0, "File size limit for the above option, MB", gr.Number),
-    "target_side_length": OptionInfo(4000, "Width/height limit for the above option, in pixels", gr.Number),
-    "img_max_size_mp": OptionInfo(200, "Maximum image size, in megapixels", gr.Number),
-
-    "use_original_name_batch": OptionInfo(True, "Use original name for output filename during batch process in extras tab"),
-    "use_upscaler_name_as_suffix": OptionInfo(False, "Use upscaler name as filename suffix in the extras tab"),
-    "save_selected_only": OptionInfo(True, "When using 'Save' button, only save a single selected image"),
-    "save_init_img": OptionInfo(False, "Save init images when using img2img"),
-
-    "temp_dir":  OptionInfo("", "Directory for temporary images; leave empty for default"),
-    "clean_temp_dir_at_start": OptionInfo(False, "Cleanup non-default temporary directory when starting webui"),
-
-}))
+options_templates |= options_section(
+    ('saving-images', "Saving images/grids"),
+    {
+        "samples_save": OptionInfo(True, "Always save all generated images"),
+        "samples_format": OptionInfo('png', 'File format for images'),
+        "samples_filename_pattern": OptionInfo(
+            "", "Images filename pattern", component_args=hide_dirs
+        ),
+        "save_images_add_number": OptionInfo(
+            True,
+            "Add number to filename when saving",
+            component_args=hide_dirs,
+        ),
+        "grid_save": OptionInfo(True, "Always save all generated image grids"),
+        "grid_format": OptionInfo('png', 'File format for grids'),
+        "grid_extended_filename": OptionInfo(
+            False,
+            "Add extended info (seed, prompt) to filename when saving grid",
+        ),
+        "grid_only_if_multiple": OptionInfo(
+            True, "Do not save grids consisting of one picture"
+        ),
+        "grid_prevent_empty_spots": OptionInfo(
+            False, "Prevent empty spots in grid (when set to autodetect)"
+        ),
+        "n_rows": OptionInfo(
+            -1,
+            "Grid row count; use -1 for autodetect and 0 for it to be same as batch size",
+            gr.Slider,
+            {"minimum": -1, "maximum": 16, "step": 1},
+        ),
+        "enable_pnginfo": OptionInfo(
+            True,
+            "Save text information about generation parameters as chunks to png files",
+        ),
+        "save_txt": OptionInfo(
+            False,
+            "Create a text file next to every image with generation parameters.",
+        ),
+        "save_images_before_face_restoration": OptionInfo(
+            False, "Save a copy of image before doing face restoration."
+        ),
+        "save_images_before_highres_fix": OptionInfo(
+            False, "Save a copy of image before applying highres fix."
+        ),
+        "save_images_before_color_correction": OptionInfo(
+            False,
+            "Save a copy of image before applying color correction to img2img results",
+        ),
+        "save_mask": OptionInfo(
+            False, "For inpainting, save a copy of the greyscale mask"
+        ),
+        "save_mask_composite": OptionInfo(
+            False, "For inpainting, save a masked composite"
+        ),
+        "jpeg_quality": OptionInfo(
+            80,
+            "Quality for saved jpeg images",
+            gr.Slider,
+            {"minimum": 1, "maximum": 100, "step": 1},
+        ),
+        "webp_lossless": OptionInfo(
+            False, "Use lossless compression for webp images"
+        ),
+        "export_for_4chan": OptionInfo(
+            True,
+            "If the saved image file size is above the limit, or its either width or height are above the limit, save a downscaled copy as JPG",
+        ),
+        "img_downscale_threshold": OptionInfo(
+            4.0, "File size limit for the above option, MB", gr.Number
+        ),
+        "target_side_length": OptionInfo(
+            4000,
+            "Width/height limit for the above option, in pixels",
+            gr.Number,
+        ),
+        "img_max_size_mp": OptionInfo(
+            200, "Maximum image size, in megapixels", gr.Number
+        ),
+        "use_original_name_batch": OptionInfo(
+            True,
+            "Use original name for output filename during batch process in extras tab",
+        ),
+        "use_upscaler_name_as_suffix": OptionInfo(
+            False, "Use upscaler name as filename suffix in the extras tab"
+        ),
+        "save_selected_only": OptionInfo(
+            True, "When using 'Save' button, only save a single selected image"
+        ),
+        "save_init_img": OptionInfo(
+            False, "Save init images when using img2img"
+        ),
+        "temp_dir": OptionInfo(
+            "", "Directory for temporary images; leave empty for default"
+        ),
+        "clean_temp_dir_at_start": OptionInfo(
+            False,
+            "Cleanup non-default temporary directory when starting webui",
+        ),
+    },
+)
 
 options_templates.update(options_section(('saving-paths', "Paths for saving"), {
     "outdir_samples": OptionInfo("", "Output directory for images; if empty, defaults to three directories below", component_args=hide_dirs),
@@ -378,40 +441,146 @@ options_templates.update(options_section(('interrogate', "Interrogate Options"),
     "deepbooru_filter_tags": OptionInfo("", "filter out those tags from deepbooru output (separated by comma)"),
 }))
 
-options_templates.update(options_section(('extra_networks', "Extra Networks"), {
-    "extra_networks_default_view": OptionInfo("cards", "Default view for Extra Networks", gr.Dropdown, {"choices": ["cards", "thumbs"]}),
-    "extra_networks_default_multiplier": OptionInfo(1.0, "Multiplier for extra networks", gr.Slider, {"minimum": 0.0, "maximum": 1.0, "step": 0.01}),
-    "extra_networks_card_width": OptionInfo(0, "Card width for Extra Networks (px)"),
-    "extra_networks_card_height": OptionInfo(0, "Card height for Extra Networks (px)"),
-    "extra_networks_add_text_separator": OptionInfo(" ", "Extra text to add before <...> when adding extra network to prompt"),
-    "sd_hypernetwork": OptionInfo("None", "Add hypernetwork to prompt", gr.Dropdown, lambda: {"choices": ["None"] + [x for x in hypernetworks.keys()]}, refresh=reload_hypernetworks),
-}))
+options_templates.update(
+    options_section(
+        ('extra_networks', "Extra Networks"),
+        {
+            "extra_networks_default_view": OptionInfo(
+                "cards",
+                "Default view for Extra Networks",
+                gr.Dropdown,
+                {"choices": ["cards", "thumbs"]},
+            ),
+            "extra_networks_default_multiplier": OptionInfo(
+                1.0,
+                "Multiplier for extra networks",
+                gr.Slider,
+                {"minimum": 0.0, "maximum": 1.0, "step": 0.01},
+            ),
+            "extra_networks_card_width": OptionInfo(
+                0, "Card width for Extra Networks (px)"
+            ),
+            "extra_networks_card_height": OptionInfo(
+                0, "Card height for Extra Networks (px)"
+            ),
+            "extra_networks_add_text_separator": OptionInfo(
+                " ",
+                "Extra text to add before <...> when adding extra network to prompt",
+            ),
+            "sd_hypernetwork": OptionInfo(
+                "None",
+                "Add hypernetwork to prompt",
+                gr.Dropdown,
+                lambda: {"choices": ["None"] + list(hypernetworks.keys())},
+                refresh=reload_hypernetworks,
+            ),
+        },
+    )
+)
 
-options_templates.update(options_section(('ui', "User interface"), {
-    "return_grid": OptionInfo(True, "Show grid in results for web"),
-    "return_mask": OptionInfo(False, "For inpainting, include the greyscale mask in results for web"),
-    "return_mask_composite": OptionInfo(False, "For inpainting, include masked composite in results for web"),
-    "do_not_show_images": OptionInfo(False, "Do not show any images in results for web"),
-    "send_seed": OptionInfo(True, "Send seed when sending prompt or image to other interface"),
-    "send_size": OptionInfo(True, "Send size when sending prompt or image to another interface"),
-    "font": OptionInfo("", "Font for image grids that have text"),
-    "js_modal_lightbox": OptionInfo(True, "Enable full page image viewer"),
-    "js_modal_lightbox_initially_zoomed": OptionInfo(True, "Show images zoomed in by default in full page image viewer"),
-    "js_modal_lightbox_gamepad": OptionInfo(True, "Navigate image viewer with gamepad"),
-    "js_modal_lightbox_gamepad_repeat": OptionInfo(250, "Gamepad repeat period, in milliseconds"),
-    "show_progress_in_title": OptionInfo(True, "Show generation progress in window title."),
-    "samplers_in_dropdown": OptionInfo(True, "Use dropdown for sampler selection instead of radio group"),
-    "dimensions_and_batch_together": OptionInfo(True, "Show Width/Height and Batch sliders in same row"),
-    "keyedit_precision_attention": OptionInfo(0.1, "Ctrl+up/down precision when editing (attention:1.1)", gr.Slider, {"minimum": 0.01, "maximum": 0.2, "step": 0.001}),
-    "keyedit_precision_extra": OptionInfo(0.05, "Ctrl+up/down precision when editing <extra networks:0.9>", gr.Slider, {"minimum": 0.01, "maximum": 0.2, "step": 0.001}),
-    "keyedit_delimiters": OptionInfo(".,\\/!?%^*;:{}=`~()", "Ctrl+up/down word delimiters"),
-    "quicksettings_list": OptionInfo(["sd_model_checkpoint"], "Quicksettings list", ui_components.DropdownMulti, lambda: {"choices": list(opts.data_labels.keys())}),
-    "hidden_tabs": OptionInfo([], "Hidden UI tabs (requires restart)", ui_components.DropdownMulti, lambda: {"choices": [x for x in tab_names]}),
-    "ui_reorder": OptionInfo(", ".join(ui_reorder_categories), "txt2img/img2img UI item order"),
-    "ui_extra_networks_tab_reorder": OptionInfo("", "Extra networks tab order"),
-    "localization": OptionInfo("None", "Localization (requires restart)", gr.Dropdown, lambda: {"choices": ["None"] + list(localization.localizations.keys())}, refresh=lambda: localization.list_localizations(cmd_opts.localizations_dir)),
-    "gradio_theme": OptionInfo("Default", "Gradio theme (requires restart)", ui_components.DropdownEditable, lambda: {"choices": ["Default"] + gradio_hf_hub_themes})
-}))
+options_templates.update(
+    options_section(
+        ('ui', "User interface"),
+        {
+            "return_grid": OptionInfo(True, "Show grid in results for web"),
+            "return_mask": OptionInfo(
+                False,
+                "For inpainting, include the greyscale mask in results for web",
+            ),
+            "return_mask_composite": OptionInfo(
+                False,
+                "For inpainting, include masked composite in results for web",
+            ),
+            "do_not_show_images": OptionInfo(
+                False, "Do not show any images in results for web"
+            ),
+            "send_seed": OptionInfo(
+                True,
+                "Send seed when sending prompt or image to other interface",
+            ),
+            "send_size": OptionInfo(
+                True,
+                "Send size when sending prompt or image to another interface",
+            ),
+            "font": OptionInfo("", "Font for image grids that have text"),
+            "js_modal_lightbox": OptionInfo(
+                True, "Enable full page image viewer"
+            ),
+            "js_modal_lightbox_initially_zoomed": OptionInfo(
+                True,
+                "Show images zoomed in by default in full page image viewer",
+            ),
+            "js_modal_lightbox_gamepad": OptionInfo(
+                True, "Navigate image viewer with gamepad"
+            ),
+            "js_modal_lightbox_gamepad_repeat": OptionInfo(
+                250, "Gamepad repeat period, in milliseconds"
+            ),
+            "show_progress_in_title": OptionInfo(
+                True, "Show generation progress in window title."
+            ),
+            "samplers_in_dropdown": OptionInfo(
+                True,
+                "Use dropdown for sampler selection instead of radio group",
+            ),
+            "dimensions_and_batch_together": OptionInfo(
+                True, "Show Width/Height and Batch sliders in same row"
+            ),
+            "keyedit_precision_attention": OptionInfo(
+                0.1,
+                "Ctrl+up/down precision when editing (attention:1.1)",
+                gr.Slider,
+                {"minimum": 0.01, "maximum": 0.2, "step": 0.001},
+            ),
+            "keyedit_precision_extra": OptionInfo(
+                0.05,
+                "Ctrl+up/down precision when editing <extra networks:0.9>",
+                gr.Slider,
+                {"minimum": 0.01, "maximum": 0.2, "step": 0.001},
+            ),
+            "keyedit_delimiters": OptionInfo(
+                ".,\\/!?%^*;:{}=`~()", "Ctrl+up/down word delimiters"
+            ),
+            "quicksettings_list": OptionInfo(
+                ["sd_model_checkpoint"],
+                "Quicksettings list",
+                ui_components.DropdownMulti,
+                lambda: {"choices": list(opts.data_labels.keys())},
+            ),
+            "hidden_tabs": OptionInfo(
+                [],
+                "Hidden UI tabs (requires restart)",
+                ui_components.DropdownMulti,
+                lambda: {"choices": list(tab_names)},
+            ),
+            "ui_reorder": OptionInfo(
+                ", ".join(ui_reorder_categories),
+                "txt2img/img2img UI item order",
+            ),
+            "ui_extra_networks_tab_reorder": OptionInfo(
+                "", "Extra networks tab order"
+            ),
+            "localization": OptionInfo(
+                "None",
+                "Localization (requires restart)",
+                gr.Dropdown,
+                lambda: {
+                    "choices": ["None"]
+                    + list(localization.localizations.keys())
+                },
+                refresh=lambda: localization.list_localizations(
+                    cmd_opts.localizations_dir
+                ),
+            ),
+            "gradio_theme": OptionInfo(
+                "Default",
+                "Gradio theme (requires restart)",
+                ui_components.DropdownEditable,
+                lambda: {"choices": ["Default"] + gradio_hf_hub_themes},
+            ),
+        },
+    )
+)
 
 options_templates.update(options_section(('infotext', "Infotext"), {
     "add_model_hash_to_info": OptionInfo(True, "Add model hash to generation information"),
@@ -525,10 +694,7 @@ class Options:
         """returns the default value for the key"""
 
         data_label = self.data_labels.get(key)
-        if data_label is None:
-            return None
-
-        return data_label.default
+        return None if data_label is None else data_label.default
 
     def save(self, filename):
         assert not cmd_opts.freeze_settings, "saving settings is disabled"
@@ -586,7 +752,9 @@ class Options:
             if item.section not in section_ids:
                 section_ids[item.section] = len(section_ids)
 
-        self.data_labels = {k: v for k, v in sorted(settings_items, key=lambda x: section_ids[x[1].section])}
+        self.data_labels = dict(
+            sorted(settings_items, key=lambda x: section_ids[x[1].section])
+        )
 
     def cast_value(self, key, value):
         """casts an arbitrary to the same type as this setting's value with key

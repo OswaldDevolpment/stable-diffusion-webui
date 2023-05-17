@@ -21,13 +21,22 @@ def register_page(page):
 
     extra_pages.append(page)
     allowed_dirs.clear()
-    allowed_dirs.update(set(sum([x.allowed_directories_for_previews() for x in extra_pages], [])))
+    allowed_dirs.update(
+        set(
+            sum(
+                (x.allowed_directories_for_previews() for x in extra_pages), []
+            )
+        )
+    )
 
 
 def fetch_file(filename: str = ""):
     from starlette.responses import FileResponse
 
-    if not any([Path(x).absolute() in Path(filename).absolute().parents for x in allowed_dirs]):
+    if all(
+        Path(x).absolute() not in Path(filename).absolute().parents
+        for x in allowed_dirs
+    ):
         raise ValueError(f"File cannot be fetched: {filename}. Must be in one of directories registered by extra pages.")
 
     ext = os.path.splitext(filename)[1].lower()
@@ -104,7 +113,7 @@ class ExtraNetworksPage:
 
                     is_empty = len(os.listdir(x)) == 0
                     if not is_empty and not subdir.endswith("/"):
-                        subdir = subdir + "/"
+                        subdir = f"{subdir}/"
 
                     subdirs[subdir] = 1
 
@@ -118,8 +127,7 @@ class ExtraNetworksPage:
 """ for subdir in subdirs])
 
         for item in self.list_items():
-            metadata = item.get("metadata")
-            if metadata:
+            if metadata := item.get("metadata"):
                 self.metadata[item["name"]] = metadata
 
             items_html += self.create_html_for_item(item, tabname)
@@ -130,7 +138,7 @@ class ExtraNetworksPage:
 
         self_name_id = self.name.replace(" ", "_")
 
-        res = f"""
+        return f"""
 <div id='{tabname}_{self_name_id}_subdirs' class='extra-network-subdirs extra-network-subdirs-{view}'>
 {subdirs_html}
 </div>
@@ -138,8 +146,6 @@ class ExtraNetworksPage:
 {items_html}
 </div>
 """
-
-        return res
 
     def list_items(self):
         raise NotImplementedError()
@@ -158,8 +164,7 @@ class ExtraNetworksPage:
         width = f"width: {shared.opts.extra_networks_card_width}px;" if shared.opts.extra_networks_card_width else ''
         background_image = f"background-image: url(\"{html.escape(preview)}\");" if preview else ''
         metadata_button = ""
-        metadata = item.get("metadata")
-        if metadata:
+        if metadata := item.get("metadata"):
             metadata_button = f"<div class='metadata-button' title='Show metadata' onclick='extraNetworksRequestMetadata(event, {json.dumps(self.name)}, {json.dumps(item['name'])})'></div>"
 
         local_path = ""
@@ -199,13 +204,22 @@ class ExtraNetworksPage:
         if shared.opts.samples_format not in preview_extensions:
             preview_extensions.append(shared.opts.samples_format)
 
-        potential_files = sum([[path + "." + ext, path + ".preview." + ext] for ext in preview_extensions], [])
+        potential_files = sum(
+            (
+                [f"{path}.{ext}", f"{path}.preview.{ext}"]
+                for ext in preview_extensions
+            ),
+            [],
+        )
 
-        for file in potential_files:
-            if os.path.isfile(file):
-                return self.link_preview(file)
-
-        return None
+        return next(
+            (
+                self.link_preview(file)
+                for file in potential_files
+                if os.path.isfile(file)
+            ),
+            None,
+        )
 
     def find_description(self, path):
         """
@@ -327,7 +341,10 @@ def setup_ui(ui, gallery):
 
         is_allowed = False
         for extra_page in ui.stored_extra_pages:
-            if any([path_is_parent(x, filename) for x in extra_page.allowed_directories_for_previews()]):
+            if any(
+                path_is_parent(x, filename)
+                for x in extra_page.allowed_directories_for_previews()
+            ):
                 is_allowed = True
                 break
 

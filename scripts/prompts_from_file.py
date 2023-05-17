@@ -28,7 +28,7 @@ def process_float_tag(tag):
 
 
 def process_boolean_tag(tag):
-    return True if (tag == "true") else False
+    return tag == "true"
 
 
 prompt_tags = {
@@ -72,7 +72,7 @@ def cmdargs(line):
 
         tag = arg[2:]
 
-        if tag == "prompt" or tag == "negative_prompt":
+        if tag in ["prompt", "negative_prompt"]:
             pos += 1
             prompt = args[pos]
             pos += 1
@@ -101,9 +101,8 @@ def cmdargs(line):
 def load_prompt_file(file):
     if file is None:
         return None, gr.update(), gr.update(lines=7)
-    else:
-        lines = [x.strip() for x in file.decode('utf8', errors='ignore').split("\n")]
-        return None, "\n".join(lines), gr.update(lines=7)
+    lines = [x.strip() for x in file.decode('utf8', errors='ignore').split("\n")]
+    return None, "\n".join(lines), gr.update(lines=7)
 
 
 class Script(scripts.Script):
@@ -151,14 +150,14 @@ class Script(scripts.Script):
 
         print(f"Will process {len(lines)} lines in {job_count} jobs.")
         if (checkbox_iterate or checkbox_iterate_batch) and p.seed == -1:
-            p.seed = int(random.randrange(4294967294))
+            p.seed = random.randrange(4294967294)
 
         state.job_count = job_count
 
         images = []
         all_prompts = []
         infotexts = []
-        for n, args in enumerate(jobs):
+        for args in jobs:
             state.job = f"{state.job_no + 1} out of {state.job_count}"
 
             copy_p = copy.copy(p)
@@ -167,7 +166,7 @@ class Script(scripts.Script):
 
             proc = process_images(copy_p)
             images += proc.images
-            
+
             if checkbox_iterate:
                 p.seed = p.seed + (p.batch_size * p.n_iter)
             all_prompts += proc.all_prompts

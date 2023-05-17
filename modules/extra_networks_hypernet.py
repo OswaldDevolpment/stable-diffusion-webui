@@ -9,7 +9,11 @@ class ExtraNetworkHypernet(extra_networks.ExtraNetwork):
     def activate(self, p, params_list):
         additional = shared.opts.sd_hypernetwork
 
-        if additional != "None" and additional in shared.hypernetworks and len([x for x in params_list if x.items[0] == additional]) == 0:
+        if (
+            additional != "None"
+            and additional in shared.hypernetworks
+            and not [x for x in params_list if x.items[0] == additional]
+        ):
             hypernet_prompt_text = f"<hypernet:{additional}:{shared.opts.extra_networks_default_multiplier}>"
             p.all_prompts = [f"{prompt}{hypernet_prompt_text}" for prompt in p.all_prompts]
             params_list.append(extra_networks.ExtraNetworkParams(items=[additional, shared.opts.extra_networks_default_multiplier]))

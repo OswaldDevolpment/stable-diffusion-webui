@@ -37,9 +37,7 @@ def image_grid(imgs, batch_size=1, rows=None):
         else:
             rows = math.sqrt(len(imgs))
             rows = round(rows)
-    if rows > len(imgs):
-        rows = len(imgs)
-
+    rows = min(rows, len(imgs))
     cols = math.ceil(len(imgs) / rows)
 
     params = script_callbacks.ImageGridLoopParams(imgs, cols, rows)
@@ -170,7 +168,12 @@ def draw_grid_annotations(im, width, height, hor_texts, ver_texts, margin=0):
     color_active = (0, 0, 0)
     color_inactive = (153, 153, 153)
 
-    pad_left = 0 if sum([sum([len(line.text) for line in lines]) for lines in ver_texts]) == 0 else width * 3 // 4
+    pad_left = (
+        0
+        if sum(sum(len(line.text) for line in lines) for lines in ver_texts)
+        == 0
+        else width * 3 // 4
+    )
 
     cols = im.width // width
     rows = im.height // height
@@ -194,8 +197,15 @@ def draw_grid_annotations(im, width, height, hor_texts, ver_texts, margin=0):
             line.size = (bbox[2] - bbox[0], bbox[3] - bbox[1])
             line.allowed_width = allowed_width
 
-    hor_text_heights = [sum([line.size[1] + line_spacing for line in lines]) - line_spacing for lines in hor_texts]
-    ver_text_heights = [sum([line.size[1] + line_spacing for line in lines]) - line_spacing * len(lines) for lines in ver_texts]
+    hor_text_heights = [
+        sum(line.size[1] + line_spacing for line in lines) - line_spacing
+        for lines in hor_texts
+    ]
+    ver_text_heights = [
+        sum(line.size[1] + line_spacing for line in lines)
+        - line_spacing * len(lines)
+        for lines in ver_texts
+    ]
 
     pad_top = 0 if sum(hor_text_heights) == 0 else max(hor_text_heights) + line_spacing * 2
 
@@ -261,7 +271,7 @@ def resize_image(resize_mode, im, width, height, upscaler_name=None):
 
         if scale > 1.0:
             upscalers = [x for x in shared.sd_upscalers if x.name == upscaler_name]
-            if len(upscalers) == 0:
+            if not upscalers:
                 upscaler = shared.sd_upscalers[0]
                 print(f"could not find upscaler named {upscaler_name or '<empty string>'}, using {upscaler.name} as a fallback")
             else:
@@ -399,14 +409,17 @@ class FilenameGenerator:
 
     def prompt_words(self):
         words = [x for x in re_nonletters.split(self.prompt or "") if len(x) > 0]
-        if len(words) == 0:
+        if not words:
             words = ["empty"]
-        return sanitize_filename_part(" ".join(words[0:opts.directories_max_prompt_words]), replace_spaces=False)
+        return sanitize_filename_part(
+            " ".join(words[: opts.directories_max_prompt_words]),
+            replace_spaces=False,
+        )
 
     def datetime(self, *args):
         time_datetime = datetime.datetime.now()
 
-        time_format = args[0] if len(args) > 0 and args[0] != "" else self.default_time_format
+        time_format = args[0] if args and args[0] != "" else self.default_time_format
         try:
             time_zone = pytz.timezone(args[1]) if len(args) > 1 else None
         except pytz.exceptions.UnknownTimeZoneError as _:

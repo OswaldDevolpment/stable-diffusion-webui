@@ -40,12 +40,14 @@ def load_models(model_path: str, model_url: str = None, command_path: str = None
                 if os.path.islink(full_path) and not os.path.exists(full_path):
                     print(f"Skipping broken symlink: {full_path}")
                     continue
-                if ext_blacklist is not None and any([full_path.endswith(x) for x in ext_blacklist]):
+                if ext_blacklist is not None and any(
+                    full_path.endswith(x) for x in ext_blacklist
+                ):
                     continue
                 if full_path not in output:
                     output.append(full_path)
 
-        if model_url is not None and len(output) == 0:
+        if model_url is not None and not output:
             if download_name is not None:
                 from basicsr.utils.download_util import load_file_from_url
                 dl = load_file_from_url(model_url, model_path, True, download_name)

@@ -89,9 +89,7 @@ def plaintext_to_html(text):
 
 
 def send_gradio_gallery_to_image(x):
-    if len(x) == 0:
-        return None
-    return image_from_url_text(x[0])
+    return None if len(x) == 0 else image_from_url_text(x[0])
 
 def visit(x, func, path=""):
     if hasattr(x, 'children'):
@@ -106,7 +104,7 @@ def visit(x, func, path=""):
 
 def add_style(name: str, prompt: str, negative_prompt: str):
     if name is None:
-        return [gr_show() for x in range(4)]
+        return [gr_show() for _ in range(4)]
 
     style = modules.styles.PromptStyle(name, prompt, negative_prompt)
     shared.prompt_styles.styles[style.name] = style
@@ -276,7 +274,10 @@ def update_token_counter(text, steps):
 
     flat_prompts = reduce(lambda list1, list2: list1+list2, prompt_schedules)
     prompts = [prompt_text for step, prompt_text in flat_prompts]
-    token_count, max_length = max([model_hijack.get_prompt_lengths(prompt) for prompt in prompts], key=lambda args: args[0])
+    token_count, max_length = max(
+        (model_hijack.get_prompt_lengths(prompt) for prompt in prompts),
+        key=lambda args: args[0],
+    )
     return f"<span class='gr-box gr-text-input'>{token_count}/{max_length}</span>"
 
 

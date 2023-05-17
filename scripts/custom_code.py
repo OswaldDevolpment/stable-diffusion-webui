@@ -10,9 +10,7 @@ from modules.shared import opts, cmd_opts, state
 def convertExpr2Expression(expr):
     expr.lineno = 0
     expr.col_offset = 0
-    result = ast.Expression(expr.value, lineno=0, col_offset = 0)
-
-    return result
+    return ast.Expression(expr.value, lineno=0, col_offset = 0)
 
 
 def exec_with_return(code, module):

@@ -44,12 +44,7 @@ def apply_prompt(p, x, xs):
 
 
 def apply_order(p, x, xs):
-    token_order = []
-
-    # Initally grab the tokens from the prompt, so they can be replaced in order of earliest seen
-    for token in x:
-        token_order.append((p.prompt.find(token), token))
-
+    token_order = [(p.prompt.find(token), token) for token in x]
     token_order.sort(key=lambda t: t[0])
 
     prompt_parts = []
@@ -57,7 +52,7 @@ def apply_order(p, x, xs):
     # Split the prompt up, taking out the tokens
     for _, token in token_order:
         n = p.prompt.find(token)
-        prompt_parts.append(p.prompt[0:n])
+        prompt_parts.append(p.prompt[:n])
         p.prompt = p.prompt[n + len(token):]
 
     # Rebuild the prompt with the tokens in the order we want
@@ -100,24 +95,22 @@ def apply_clip_skip(p, x, xs):
 
 
 def apply_upscale_latent_space(p, x, xs):
-    if x.lower().strip() != '0':
-        opts.data["use_scale_latent_for_hires_fix"] = True
-    else:
-        opts.data["use_scale_latent_for_hires_fix"] = False
+    opts.data["use_scale_latent_for_hires_fix"] = x.lower().strip() != '0'
 
 
 def find_vae(name: str):
-    if name.lower() in ['auto', 'automatic']:
+    if name.lower() in {'auto', 'automatic'}:
         return modules.sd_vae.unspecified
     if name.lower() == 'none':
         return None
-    else:
-        choices = [x for x in sorted(modules.sd_vae.vae_dict, key=lambda x: len(x)) if name.lower().strip() in x.lower()]
-        if len(choices) == 0:
-            print(f"No VAE found for {name}; using automatic")
-            return modules.sd_vae.unspecified
-        else:
-            return modules.sd_vae.vae_dict[choices[0]]
+    if choices := [
+        x
+        for x in sorted(modules.sd_vae.vae_dict, key=lambda x: len(x))
+        if name.lower().strip() in x.lower()
+    ]:
+        return modules.sd_vae.vae_dict[choices[0]]
+    print(f"No VAE found for {name}; using automatic")
+    return modules.sd_vae.unspecified
 
 
 def apply_vae(p, x, xs):
@@ -551,7 +544,12 @@ class Script(scripts.Script):
 
         def fix_axis_seeds(axis_opt, axis_list):
             if axis_opt.label in ['Seed', 'Var. seed']:
-                return [int(random.randrange(4294967294)) if val is None or val == '' or val == -1 else val for val in axis_list]
+                return [
+                    random.randrange(4294967294)
+                    if val is None or val == '' or val == -1
+                    else val
+                    for val in axis_list
+                ]
             else:
                 return axis_list
 
@@ -600,23 +598,13 @@ class Script(scripts.Script):
         second_axes_processed = 'y'
         if x_opt.cost > y_opt.cost and x_opt.cost > z_opt.cost:
             first_axes_processed = 'x'
-            if y_opt.cost > z_opt.cost:
-                second_axes_processed = 'y'
-            else:
-                second_axes_processed = 'z'
+            second_axes_processed = 'y' if y_opt.cost > z_opt.cost else 'z'
         elif y_opt.cost > x_opt.cost and y_opt.cost > z_opt.cost:
             first_axes_processed = 'y'
-            if x_opt.cost > z_opt.cost:
-                second_axes_processed = 'x'
-            else:
-                second_axes_processed = 'z'
+            second_axes_processed = 'x' if x_opt.cost > z_opt.cost else 'z'
         elif z_opt.cost > x_opt.cost and z_opt.cost > y_opt.cost:
             first_axes_processed = 'z'
-            if x_opt.cost > y_opt.cost:
-                second_axes_processed = 'x'
-            else:
-                second_axes_processed = 'y'
-
+            second_axes_processed = 'x' if x_opt.cost > y_opt.cost else 'y'
         grid_infotext = [None] * (1 + len(zs))
 
         def cell(x, y, z, ix, iy, iz):
