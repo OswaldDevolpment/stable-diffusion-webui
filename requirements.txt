@@ -5,7 +5,7 @@ basicsr
 fonts
 font-roboto
 gfpgan
-gradio==3.29.0
+gradio==4.36.0
 invisible-watermark
 numpy
 omegaconf
@@ -17,7 +17,7 @@ pytorch_lightning==1.9.4
 realesrgan
 scikit-image==0.19.2
 timm==0.6.7
-transformers==4.25.1
+transformers==4.38.0
 torch
 einops
 jsonmerge
